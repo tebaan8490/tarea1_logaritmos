@@ -6,5 +6,5 @@ struct MBR {
 struct Nodo {
     int k; // cantidad de hijos, varía entre 1 y b
     MBR mbr[204]; //arreglo de b pares clave-valor
-    int pad; // pad: 12 bytes libres para que la estructura coincida con un bloque
+    char pad[12]; // pad: 12 bytes libres para que la estructura coincida con un bloque
 };
