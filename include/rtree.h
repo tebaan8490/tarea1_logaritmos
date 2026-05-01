@@ -1,30 +1,59 @@
 #pragma once
-#include <cstdint>
-#include <vector>
 #include <fstream>
+#include <string>
+#include <vector>
 
-const int B =204;
-const int BLOCK_SIZE = 4096;
+/// Capacidad máxima de hijos por nodo (calculada para que sizeof(Nodo)==4096)
+constexpr int B = 204;
 
-struct MBR{
-    float x1,x2,y1,y2; // límites del rectángulo
-    int valor; // posición del hijo en el archivo, -1 si es hoja
+/// Tamaño de un bloque de disco en bytes (= tamaño de un nodo serializado)
+constexpr int BLOCK_SIZE = 4096;
+
+struct MBR {
+    float x1, x2, y1, y2;
+    int   valor;
 };
 
-struct Nodo{
-    int k; // cantidad de hijos, varía entre 1 y B
-    MBR hijos[B]; // arreglo de B pares clave-valor
-    char pad[12]; // pad: 12 bytes libres para que la estructura coincida con un bloque
+struct Nodo {
+    int  k;
+    MBR  hijos[B];
+    char pad[12];
 };
 
-static_assert(sizeof(Nodo) == BLOCK_SIZE, "El tamaño de Nodo debe ser igual a BLOCK_SIZE");
+static_assert(sizeof(Nodo) == BLOCK_SIZE,
+              "sizeof(Nodo) debe ser exactamente 4096 bytes");
+
+class RTree {
+public:
+    /**
+     * @brief Construye un RTree a partir de un archivo binario ya serializado
+     * @param filename Ruta al archivo binario que contiene el árbol
+     */
+    explicit RTree(const std::string& filename);
+
+    Nodo read_node_at(int idx, long long& ios) const;
+
+    std::vector<MBR> search(float xmin, float xmax,
+                             float ymin, float ymax,
+                             long long& ios) const;
+
+private:
+    std::string filename;
+
+    /// Implementación recursiva de search; desciende desde el nodo en 'idx'
+    void search_rec(int idx,
+                    float xmin, float xmax, float ymin, float ymax,
+                    std::vector<MBR>& results, long long& ios) const;
+};
 
 
-void nearestX(std::vector<MBR> pares, std::vector<Nodo>& nodos);
+namespace RTreeUtils {
 
-void str(std::vector<MBR> pares, std::vector<Nodo>& nodos);
+void write_tree_to_file(const std::string& filename,
+                         const std::vector<Nodo>& nodes);
 
-std::vector<MBR> buscar(const std::string& archivo, 
-        float x1, float x2, 
-        float y1, float y2,
-        long long& ios);
+void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes);
+
+void str(std::vector<MBR> points, std::vector<Nodo>& nodes);
+
+} // namespace RTreeUtils
