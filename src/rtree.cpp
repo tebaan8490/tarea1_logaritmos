@@ -85,6 +85,23 @@ MBR calc_mbr(const std::vector<MBR>& items, int from, int to) {
     return result;
 }
 
+MBR another_calc_mbr(const std::vector<MBR>& items) {
+    MBR result;
+    result.valor = -1;
+    result.x1 = INFINITY;
+    result.x2 = -INFINITY;
+    result.y1 = INFINITY;
+    result.y2 = -INFINITY;
+    for (int i=0; i<items.size(); i++) {
+        result.x1 = std::min(result.x1, items[i].x1);
+        result.x2 = std::max(result.x2, items[i].x2);
+        result.y1 = std::min(result.y1, items[i].y1);
+        result.y2 = std::max(result.y2, items[i].y2);
+    }
+    return result;
+}
+
+
 float center_x(const MBR& m) { return (m.x1 + m.x2) * 0.5f; }
 float center_y(const MBR& m) { return (m.y1 + m.y2) * 0.5f; }
 

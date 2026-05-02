@@ -54,6 +54,6 @@ void write_tree_to_file(const std::string& filename,
 
 void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
-void str(std::vector<MBR> points, std::vector<Nodo>& nodes);
+void sort_tile_recursive(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
 } // namespace RTreeUtils
