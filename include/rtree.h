@@ -25,10 +25,6 @@ static_assert(sizeof(Nodo) == BLOCK_SIZE,
 
 class RTree {
 public:
-    /**
-     * @brief Construye un RTree a partir de un archivo binario ya serializado
-     * @param filename Ruta al archivo binario que contiene el árbol
-     */
     explicit RTree(const std::string& filename);
 
     Nodo read_node_at(int idx, long long& ios) const;
@@ -40,7 +36,6 @@ public:
 private:
     std::string filename;
 
-    /// Implementación recursiva de search; desciende desde el nodo en 'idx'
     void search_rec(int idx,
                     float xmin, float xmax, float ymin, float ymax,
                     std::vector<MBR>& results, long long& ios) const;
@@ -55,6 +50,9 @@ void write_tree_to_file(const std::string& filename,
 
 void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
-void sort_tile_recursive(std::vector<MBR> pares, std::vector<Nodo>& results, int current_node = 0);
+void str(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
-} // namespace RTreeUtils
+void sort_tile_recursive(std::vector<MBR> pares, std::vector<Nodo>& results,
+                          int current_node = 0);
+
+}
