@@ -46,6 +46,7 @@ private:
                     std::vector<MBR>& results, long long& ios) const;
 };
 
+MBR another_calc_mbr(const std::vector<MBR>& items);
 
 namespace RTreeUtils {
 
@@ -54,6 +55,6 @@ void write_tree_to_file(const std::string& filename,
 
 void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
-void sort_tile_recursive(std::vector<MBR> points, std::vector<Nodo>& nodes);
+void sort_tile_recursive(std::vector<MBR> pares, std::vector<Nodo>& results, int current_node = 0);
 
 } // namespace RTreeUtils
