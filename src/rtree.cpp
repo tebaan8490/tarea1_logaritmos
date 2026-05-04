@@ -26,12 +26,32 @@ Nodo RTree::read_node_at(int idx, long long& ios) const {
     return node;
 }
 
+/**
+ * @brief Determina si un MBR intersecta un cierto rango
+ * 
+ *
+ * @param xmin Coordenada x mínimo del rango de búsqueda
+ * @param xmax Coordenada x máximo del rango de búsqueda
+ * @param ymin Coordenada y mínimo del rango de búsqueda
+ * @param ymax Coordenada y máximo del rango de búsqueda
+ * @return booleano que indica si intersecta o no
+ */
 static bool intersects(const MBR& m, float xmin, float xmax,
                         float ymin, float ymax) {
     return m.x1 <= xmax && m.x2 >= xmin &&
            m.y1 <= ymax && m.y2 >= ymin;
 }
 
+/**
+ * @brief Determina si un MBR está contenido en un rango de búsqueda
+ * 
+ *
+ * @param xmin Coordenada x mínimo del rango de búsqueda
+ * @param xmax Coordenada x máximo del rango de búsqueda
+ * @param ymin Coordenada y mínimo del rango de búsqueda
+ * @param ymax Coordenada y máximo del rango de búsqueda
+ * @return booleano que indica si está contenido o no
+ */
 static bool contains(const MBR& m, float xmin, float xmax,
                      float ymin, float ymax) {
     return m.x1 >= xmin && m.x1 <= xmax &&
@@ -66,6 +86,16 @@ std::vector<MBR> RTree::search(float xmin, float xmax,
     return results;
 }
 
+/**
+ * @brief Función para calcular un MBR que contiene otros MBR
+ *
+ * Recibe un vector de MBR y calcula el MBR que los contiene
+ *
+ * @param items Los MBR
+ * @param from Entero que determina desde que MBR se empieza a calcular el nuevo MBR
+ * @param to Entero que determina hasta que MBR se calcula
+ * @return MBR que contiene los MBR indicados de items
+ */
 static MBR calc_mbr(const std::vector<MBR>& items, int from, int to) {
     MBR result = items[from];
     result.valor = -1;
@@ -94,9 +124,30 @@ MBR another_calc_mbr(const std::vector<MBR>& items) {
     return result;
 }
 
+/**
+ * @brief Funciones que calculan el centro de un MBR. En coordenada x
+ *
+ * @param m MBR al que se le calcula su centro
+ * @return Su centro en coordenada x
+ */
 static float center_x(const MBR& m) { return (m.x1 + m.x2) * 0.5f; }
+
+/**
+ * @brief Funciones que calculan el centro de un MBR. En coordenada y
+ *
+ * @param m MBR al que se le calcula su centro
+ * @return Su centro en coordenada y
+ */
 static float center_y(const MBR& m) { return (m.y1 + m.y2) * 0.5f; }
 
+/**
+ * @brief Empaquete MBRs como nodos, y calcula su MBR que los contiene
+ *
+ * @param items MBRs
+ * @param nodes Vector de nodos donde se guardan los MBR de items
+ * @param offset Offset para saber donde guardar los nodos y MBR
+ * @return Vector de MBR 
+ */
 static std::vector<MBR> pack_nodes(const std::vector<MBR>& items,
                                     std::vector<Nodo>& nodes, int offset) {
     int n = static_cast<int>(items.size());
@@ -120,6 +171,13 @@ static std::vector<MBR> pack_nodes(const std::vector<MBR>& items,
     return upper;
 }
 
+/**
+ * @brief Construye la raiz del RTree
+ *
+ * @param upper Vector de MBR con los hijos
+ * @param nodes Vector de nodos donde se guardará la raiz
+ * @return Raiz en nodes 
+ */
 static void build_root(const std::vector<MBR>& upper, std::vector<Nodo>& nodes) {
     Nodo root{};
     root.k = static_cast<int>(upper.size());
@@ -141,7 +199,20 @@ void write_tree_to_file(const std::string& filename,
         out.write(reinterpret_cast<const char*>(&node), BLOCK_SIZE);
 }
 
-
+/**
+ * @brief Crea un RTree representado como un vector de nodos
+ * 
+ * Toma los puntos ordenados por coordenada x, los divide en n/B grupos
+ * para luego guardarlos como nodos, y calcular sus MBR. Si estos n/B
+ * pares llave valor caben en un nodo raiz, se construye dicha raiz
+ * en nodes. Si no, se hace una recursión de nearest_x con esos
+ * n/B pares
+ * 
+ * @param points Los puntos a transformar
+ * @param nodes El vector de nodos en el que se guarda el resultado
+ * @param offset Entero que indica donde guardar MBRs o nodos
+ * @return Vector de nodos desde nodes
+ */
 static void nearest_x_rec(std::vector<MBR> items,
                             std::vector<Nodo>& nodes, int offset) {
     std::sort(items.begin(), items.end(),
@@ -162,7 +233,22 @@ void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes) {
     nearest_x_rec(points, nodes, 1);
 }
 
-
+/**
+ * @brief Crea un RTree representado como un vector de nodos
+ * 
+ * Toma los puntos ordenados por coordenada x, los divide en raiz de n/B
+ * grupos. Luego, por cada grupo se ordenan los puntos por coordenada y,
+ * y se vuelve a dividir en raiz de n/B sub-grupos, quedando con n/B
+ * grupos en total para luego guardarlos como nodos, y calcular sus MBR.
+ * Si estos n/B pares llave valor caben en un nodo raiz, se construye 
+ * dicha raiz en nodes. Si no, se hace una recursión de nearest_x con
+ * esos n/B pares.
+ * 
+ * @param points Los puntos a transformar
+ * @param nodes El vector de nodos en el que se guarda el resultado
+ * @param current_node Indicador de en que nodo queremos guardar en los resultados
+ * @return Vector de nodos desde nodes
+ */
 static void str_rec(std::vector<MBR> pares, std::vector<Nodo>& results, int current_node) {
 
     // Ordenamos los pares de MBR por coordenada x

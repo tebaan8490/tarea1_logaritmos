@@ -55,9 +55,12 @@ static_assert(sizeof(Nodo) == BLOCK_SIZE,
 class RTree {
 public:
     /**
-    * @brief Construye un RTree a partir de un archivo binario
-    * @param filename Nombre del archivo que contiene el RTree
-    */
+ * @brief Estructura que representa un MBR en disco
+ *
+ * Cada MBR contiene:
+ * - x1, x2, y1, y2: Puntos que representan un MBR
+ * - valor: Puntero a la dirección donde están guardados los hijos de un nodo
+ */
     explicit RTree(const std::string& filename);
 
     /**
@@ -84,10 +87,10 @@ public:
     * Esta función busca recursivamente MBR contenidos
     * en un rango determinado en el RTree
     *
-    * @param xmin coordenada x mínimo del rango de búsqueda
-    * @param xmax coordenada x máximo del rango de búsqueda
-    * @param ymin coordenada y mínimo del rango de búsqueda
-    * @param ymax coordenada y máximo del rango de búsqueda
+    * @param xmin Coordenada x mínimo del rango de búsqueda
+    * @param xmax Coordenada x máximo del rango de búsqueda
+    * @param ymin Coordenada y mínimo del rango de búsqueda
+    * @param ymax Coordenada y máximo del rango de búsqueda
     * @param ios Contador de I/Os (lecturas y escrituras)
     * @return Conjunto de MBR contenidos en el rango
     */
@@ -125,13 +128,14 @@ private:
  * Recibe un vector de MBR y calcula el MBR que los contiene
  *
  * @param items los MBR a contener
+ * @return MBR que contiene los MBR de items
  */
 MBR another_calc_mbr(const std::vector<MBR>& items);
 
 namespace RTreeUtils {
 
 /**
- * @brief Serializa y escribe un RTree en un archivo binario
+ * @brief Escribe un RTree en un archivo binario
  *
  * Esta función recibe un vector de nodos y los escribe secuencialmente
  * en un archivo binario. Cada nodo ocupa un bloque de espacio en
@@ -139,6 +143,7 @@ namespace RTreeUtils {
  *
  * @param filename Nombre del archivo donde se escribirá el RTree
  * @param nodes Vector de nodos del RTree
+ * @return Nodo deserializado desde el archivo
  * @throws Termina el programa si no puede abrir el archivo
  */
 void write_tree_to_file(const std::string& filename,
@@ -146,43 +151,34 @@ void write_tree_to_file(const std::string& filename,
 
 
 /**
- * @brief Crea un RTree representado como un vector de nodos
- * 
- * Toma los puntos ordenados por coordenada x, los divide en n/B grupos
- * para luego guardarlos como nodos, y calcular sus MBR. Si estos n/B
- * pares llave valor caben en un nodo raiz, se construye dicha raiz
- * en nodes. Si no, se hace una recursión de nearest_x con esos
- * n/B pares
+ * @brief Comienzo de nearest_x
  * 
  * @param points Los puntos a transformar
  * @param nodes El vector de nodos en el que se guarda el resultado
- * 
+ * @return Vector de nodos desde nodes
  */
 void nearest_x(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
 /**
- * @brief Comienzo de sort_title_recursive
+ * @brief Función que actua antes de la recursión de sort_tile_recursive
+ * 
+ * Simplemente elimina los elementos en nodes y reserva un espacio al
+ * comienzo para la raiz. Luego procede a usar str_rec para comenzar
+ * el algoritmo.
  * 
  * @param points Los puntos a transformar
  * @param nodes El vector de nodos en el que se guarda el resultado
- * 
+ * @return Vector de nodos desde nodes
  */
 void str(std::vector<MBR> points, std::vector<Nodo>& nodes);
 
 /**
- * @brief Crea un RTree representado como un vector de nodos
- * 
- * Toma los puntos ordenados por coordenada x, los divide en raiz de n/B
- * grupos. Luego, por cada grupo se ordenan los puntos por coordenada y,
- * y se vuelve a dividir en raiz de n/B sub-grupos, quedando con n/B
- * grupos en total para luego guardarlos como nodos, y calcular sus MBR.
- * Si estos n/B pares llave valor caben en un nodo raiz, se construye 
- * dicha raiz en nodes. Si no, se hace una recursión de nearest_x con
- * esos n/B pares.
+ * @brief Comienzo de sort_tile_recursive
  * 
  * @param points Los puntos a transformar
  * @param nodes El vector de nodos en el que se guarda el resultado
- * 
+ * @param current_node Indicador de en que nodo queremos guardar en los resultados
+ * @return Vector de nodos desde nodes
  */
 void sort_tile_recursive(std::vector<MBR> pares, std::vector<Nodo>& results,
                           int current_node = 0);

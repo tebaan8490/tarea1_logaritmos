@@ -10,6 +10,7 @@ template <typename Func>
  * @brief Función que mide el tiempo que tarda una función en correr
  *
  * @param f La función a la cual se mide el tiempo
+ * @return Tiempo medido
  */
 double measure_time(Func f) {
     auto start = std::chrono::high_resolution_clock::now();

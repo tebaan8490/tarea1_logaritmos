@@ -12,6 +12,7 @@
  * @param count El número de consultas a generar
  * @param s Para la distribución de las consultas
  * @param seed La semilla que determina las consultas generadas
+ * @return Vector con las consultas generadas
  */
 std::vector<Query> generate_queries(int count, float s, unsigned seed) {
     std::mt19937 gen(seed);
@@ -30,6 +31,7 @@ std::vector<Query> generate_queries(int count, float s, unsigned seed) {
  * @brief Genera un par con el promedio y la varianza de enteros
  *
  * @param values Enteros a los que se les calcula promedio y varianza
+ * @return Par (promedio, varianza)
  */
 std::pair<double, double> stadistics(const std::vector<int>& values) {
     double promedio = 0;
